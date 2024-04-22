@@ -1,0 +1,60 @@
+# CONFIG #
+config system interface
+    edit "fortilink"
+        set switch-controller-dynamic "fortilink"
+    next
+    edit "HOSTS"
+        set vdom "root"
+        set ip 192.168.110.1 255.255.255.0
+        set allowaccess ping
+        set device-identification enable
+        set interface "fortilink"
+        set vlanid 10
+    next
+    edit "PRINTERS"
+        set vdom "root"
+        set ip 192.168.220.1 255.255.255.0
+        set allowaccess ping
+        set device-identification enable
+        set interface "fortilink"
+        set vlanid 20
+    next
+end
+
+# MODIFY DYNAMIC MAC ADDRESS TIMER #
+config switch-controller global
+    # SETS THE TIMEOUT TO 10 SECONDS #
+    set mac-aging-interval 10
+    # DISABLES THE MAC RETENTION PERIOD #
+    set mac-retention-period 0
+end
+
+config switch-controller vlan-policy
+    edit "VLAN_POLICY_1"
+        set fortilink "fortilink"
+        set vlan "HOSTS"
+    next
+    edit "VLAN_POLICY_2"
+        set fortilink "fortilink"
+        set vlan "PRINTERS"
+    next
+end
+
+config switch-controller dynamic-port-policy
+    edit "DPP1"
+        set fortilink "fortilink"
+        config policy
+            edit "POLICY_1"
+                set hw-vendor "TP-Link"
+                set vlan-policy "VLAN_POLICY_1"
+            next
+            edit "POLICY_2"
+                set hw-vendor "HP"
+                set vlan-policy "VLAN_POLICY_2"
+            next
+        end
+    next
+end
+
+# DEBUG VIA #
+# diag switch-controller mac-device dynamic #
